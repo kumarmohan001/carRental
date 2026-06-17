@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   CalendarDays,
@@ -10,13 +11,17 @@ import {
   Headphones,
   Instagram,
   MapPin,
+  MessageSquareText,
   Menu,
+  Phone,
   ShieldCheck,
   Sparkles,
   Star,
   Twitter,
+  User,
   Users,
-  WalletCards
+  WalletCards,
+  X
 } from "lucide-react";
 
 const heroImage =
@@ -100,7 +105,7 @@ function SectionTitle({ eyebrow, title, text }) {
   );
 }
 
-function Button({ children, variant = "primary", className = "" }) {
+function Button({ children, variant = "primary", className = "", type = "button", ...props }) {
   const styles =
     variant === "primary"
       ? "bg-gradient-to-r from-champagne via-gold to-champagne text-black shadow-glow hover:brightness-110"
@@ -108,25 +113,141 @@ function Button({ children, variant = "primary", className = "" }) {
 
   return (
     <motion.button
+      type={type}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
       className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold transition ${styles} ${className}`}
+      {...props}
     >
       {children}
     </motion.button>
   );
 }
 
+function BookingModal({ open, onClose }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-4 py-8 backdrop-blur-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 34, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.97 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="glass luxury-ring relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] p-5 sm:p-7"
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-5 top-5 rounded-full border border-white/10 bg-white/10 p-2 text-white transition hover:border-champagne hover:text-champagne"
+              aria-label="Close booking form"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.26em] text-champagne">Customer details</p>
+            <h2 className="pr-12 font-display text-3xl font-bold text-white sm:text-4xl">Book Your Premium Ride</h2>
+            <p className="mt-3 max-w-xl leading-7 text-white/62">
+              Fill your name, number, and trip details. Our team will call you for availability and final confirmation.
+            </p>
+
+            <form className="mt-7 grid gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Full Name</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <User className="h-5 w-5 text-champagne" />
+                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="Your name" required />
+                  </span>
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Mobile Number</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <Phone className="h-5 w-5 text-champagne" />
+                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="+91 98765 43210" required />
+                  </span>
+                </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Pickup Location</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <MapPin className="h-5 w-5 text-champagne" />
+                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="Mumbai Airport" />
+                  </span>
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Preferred Car</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <Car className="h-5 w-5 text-champagne" />
+                    <select className="w-full bg-transparent text-white outline-none">
+                      {cars.map((car) => (
+                        <option key={car.name} className="bg-carbon text-white">{car.name}</option>
+                      ))}
+                    </select>
+                  </span>
+                </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Pickup Date</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <CalendarDays className="h-5 w-5 text-champagne" />
+                    <input type="date" className="w-full bg-transparent text-white outline-none" />
+                  </span>
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-white/70">Return Date</span>
+                  <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <Clock className="h-5 w-5 text-champagne" />
+                    <input type="date" className="w-full bg-transparent text-white outline-none" />
+                  </span>
+                </label>
+              </div>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-semibold text-white/70">Trip Details</span>
+                <span className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                  <MessageSquareText className="mt-1 h-5 w-5 text-champagne" />
+                  <textarea
+                    className="min-h-28 w-full resize-none bg-transparent text-white outline-none placeholder:text-white/35"
+                    placeholder="City, trip duration, driver needed or self-drive, pickup time..."
+                  />
+                </span>
+              </label>
+
+              <Button className="mt-2 w-full">Submit Booking Request</Button>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function App() {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const openBooking = () => setIsBookingOpen(true);
+  const closeBooking = () => setIsBookingOpen(false);
+  const exploreCars = () => document.getElementById("fleet")?.scrollIntoView({ behavior: "smooth" });
+
   return (
     <main className="min-h-screen bg-obsidian text-platinum">
+      <BookingModal open={isBookingOpen} onClose={closeBooking} />
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/35 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-          <a href="#home" className="flex items-center gap-3" aria-label="Aurelia Drive home">
+          <a href="#home" className="flex items-center gap-3" aria-label="rentalscars home">
             <span className="flex h-10 w-10 items-center justify-center rounded-full border border-champagne/50 bg-champagne/10">
               <Car className="h-5 w-5 text-champagne" />
             </span>
-            <span className="text-lg font-extrabold tracking-wide text-white">Aurelia Drive</span>
+            <span className="text-lg font-extrabold tracking-wide text-white">rentalscars</span>
           </a>
           <div className="hidden items-center gap-8 text-sm font-semibold text-white/70 md:flex">
             <a href="#fleet" className="hover:text-champagne">Fleet</a>
@@ -134,7 +255,7 @@ function App() {
             <a href="#works" className="hover:text-champagne">How It Works</a>
             <a href="#contact" className="hover:text-champagne">Contact</a>
           </div>
-          <Button className="hidden md:inline-flex">Book Now</Button>
+          <Button onClick={openBooking} className="hidden md:inline-flex">Book Now</Button>
           <button className="rounded-full border border-white/15 p-3 text-white md:hidden" aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
@@ -169,14 +290,18 @@ function App() {
               Affordable, Reliable & Premium Car Rentals
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Button>
+              <Button onClick={openBooking}>
                 Book Now <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button variant="secondary">Explore Cars</Button>
+              <Button onClick={exploreCars} variant="secondary">Explore Cars</Button>
             </div>
           </motion.div>
 
           <motion.form
+            onSubmit={(event) => {
+              event.preventDefault();
+              openBooking();
+            }}
             initial={{ opacity: 0, y: 34 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.85 }}
@@ -207,7 +332,7 @@ function App() {
                   </span>
                 </label>
               </div>
-              <Button className="mt-2 w-full">Find My Car</Button>
+              <Button type="submit" className="mt-2 w-full">Find My Car</Button>
             </div>
           </motion.form>
         </div>
@@ -237,6 +362,7 @@ function App() {
                   <span className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2"><Fuel className="h-4 w-4 text-champagne" />{car.fuel}</span>
                   <span className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2"><Users className="h-4 w-4 text-champagne" />{car.seats}</span>
                 </div>
+                <Button onClick={openBooking} className="mt-6 w-full">Rent Now</Button>
               </div>
             </motion.article>
           ))}
@@ -307,7 +433,7 @@ function App() {
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-white/68">
             Reserve a premium vehicle now and arrive with the confidence only a world-class ride can give.
           </p>
-          <Button className="mt-8">Book Now</Button>
+          <Button onClick={openBooking} className="mt-8">Book Now</Button>
         </motion.div>
       </section>
 
@@ -316,7 +442,7 @@ function App() {
           <div>
             <div className="flex items-center gap-3">
               <Car className="h-7 w-7 text-champagne" />
-              <span className="text-xl font-extrabold text-white">Aurelia Drive</span>
+              <span className="text-xl font-extrabold text-white">rentalscars</span>
             </div>
             <p className="mt-4 max-w-md leading-7 text-white/55">
               Premium car rentals for business travel, celebrations, road escapes, and every arrival worth remembering.
@@ -324,9 +450,9 @@ function App() {
           </div>
           <div>
             <h3 className="font-bold text-white">Contact Details</h3>
-            <p className="mt-4 text-white/55">hello@aureliadrive.in</p>
-            <p className="mt-2 text-white/55">+91 98765 40199</p>
-            <p className="mt-2 text-white/55">Mumbai, Delhi NCR, Bengaluru</p>
+            <p className="mt-4 text-white/55">hello@rentalscars.in</p>
+            <p className="mt-2 text-white/55">+14844818199</p>
+            <p className="mt-2 text-white/55">Delhi</p>
           </div>
           <div>
             <h3 className="font-bold text-white">Social Media</h3>
@@ -340,7 +466,7 @@ function App() {
           </div>
         </div>
         <p className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-sm text-white/42">
-          Copyright 2026 Aurelia Drive. All rights reserved.
+          Copyright 2026 rentalscars. All rights reserved.
         </p>
       </footer>
     </main>
