@@ -12,6 +12,7 @@ import {
   Instagram,
   MapPin,
   MessageSquareText,
+  MessageCircle,
   Menu,
   Phone,
   ShieldCheck,
@@ -26,6 +27,8 @@ import {
 
 const heroImage =
   "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=2200&q=85";
+
+const WHATSAPP_NUMBER = "918512823394"; // WhatsApp number for bookings
 
 const cars = [
   {
@@ -125,6 +128,60 @@ function Button({ children, variant = "primary", className = "", type = "button"
 }
 
 function BookingModal({ open, onClose }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    pickup: "",
+    car: cars[0]?.name || "",
+    pickupDate: "",
+    returnDate: "",
+    details: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleWhatsAppSubmit = (e) => {
+    e.preventDefault();
+    
+    // Create WhatsApp message with booking details
+    const message = `Hello! I would like to book a car with the following details:
+
+*Booking Information:*
+Name: ${formData.name}
+Phone: ${formData.phone}
+Pickup Location: ${formData.pickup}
+Car: ${formData.car}
+Pickup Date: ${formData.pickupDate}
+Return Date: ${formData.returnDate}
+Trip Details: ${formData.details || "No specific details provided"}
+
+Please confirm availability and pricing.`;
+
+    // Encode the message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Create WhatsApp URL
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    
+    // Open WhatsApp
+    window.open(whatsappURL, "_blank");
+    
+    // Reset form and close modal
+    setFormData({
+      name: "",
+      phone: "",
+      pickup: "",
+      car: cars[0]?.name || "",
+      pickupDate: "",
+      returnDate: "",
+      details: ""
+    });
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -153,23 +210,37 @@ function BookingModal({ open, onClose }) {
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.26em] text-champagne">Customer details</p>
             <h2 className="pr-12 font-display text-3xl font-bold text-white sm:text-4xl">Book Your Premium Ride</h2>
             <p className="mt-3 max-w-xl leading-7 text-white/62">
-              Fill your name, number, and trip details. Our team will call you for availability and final confirmation.
+              Fill your details and we'll send booking confirmation via WhatsApp.
             </p>
 
-            <form className="mt-7 grid gap-4">
+            <form className="mt-7 grid gap-4" onSubmit={handleWhatsAppSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="grid gap-2">
                   <span className="text-sm font-semibold text-white/70">Full Name</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <User className="h-5 w-5 text-champagne" />
-                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="Your name" required />
+                    <input
+                      className="w-full bg-transparent text-white outline-none placeholder:text-white/35"
+                      placeholder="Your name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </span>
                 </label>
                 <label className="grid gap-2">
                   <span className="text-sm font-semibold text-white/70">Mobile Number</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <Phone className="h-5 w-5 text-champagne" />
-                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="+91 98765 43210" required />
+                    <input
+                      className="w-full bg-transparent text-white outline-none placeholder:text-white/35"
+                      placeholder="+91 98765 43210"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </span>
                 </label>
               </div>
@@ -179,14 +250,26 @@ function BookingModal({ open, onClose }) {
                   <span className="text-sm font-semibold text-white/70">Pickup Location</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <MapPin className="h-5 w-5 text-champagne" />
-                    <input className="w-full bg-transparent text-white outline-none placeholder:text-white/35" placeholder="Mumbai Airport" />
+                    <input
+                      className="w-full bg-transparent text-white outline-none placeholder:text-white/35"
+                      placeholder="Mumbai Airport"
+                      name="pickup"
+                      value={formData.pickup}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </span>
                 </label>
                 <label className="grid gap-2">
                   <span className="text-sm font-semibold text-white/70">Preferred Car</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <Car className="h-5 w-5 text-champagne" />
-                    <select className="w-full bg-transparent text-white outline-none">
+                    <select
+                      className="w-full bg-transparent text-white outline-none"
+                      name="car"
+                      value={formData.car}
+                      onChange={handleInputChange}
+                    >
                       {cars.map((car) => (
                         <option key={car.name} className="bg-carbon text-white">{car.name}</option>
                       ))}
@@ -200,14 +283,28 @@ function BookingModal({ open, onClose }) {
                   <span className="text-sm font-semibold text-white/70">Pickup Date</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <CalendarDays className="h-5 w-5 text-champagne" />
-                    <input type="date" className="w-full bg-transparent text-white outline-none" />
+                    <input
+                      type="date"
+                      className="w-full bg-transparent text-white outline-none"
+                      name="pickupDate"
+                      value={formData.pickupDate}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </span>
                 </label>
                 <label className="grid gap-2">
                   <span className="text-sm font-semibold text-white/70">Return Date</span>
                   <span className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                     <Clock className="h-5 w-5 text-champagne" />
-                    <input type="date" className="w-full bg-transparent text-white outline-none" />
+                    <input
+                      type="date"
+                      className="w-full bg-transparent text-white outline-none"
+                      name="returnDate"
+                      value={formData.returnDate}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </span>
                 </label>
               </div>
@@ -219,11 +316,17 @@ function BookingModal({ open, onClose }) {
                   <textarea
                     className="min-h-28 w-full resize-none bg-transparent text-white outline-none placeholder:text-white/35"
                     placeholder="City, trip duration, driver needed or self-drive, pickup time..."
+                    name="details"
+                    value={formData.details}
+                    onChange={handleInputChange}
                   />
                 </span>
               </label>
 
-              <Button className="mt-2 w-full">Submit Booking Request</Button>
+              <Button className="mt-2 w-full" type="submit">
+                <MessageCircle className="h-4 w-4" />
+                Send via WhatsApp
+              </Button>
             </form>
           </motion.div>
         </motion.div>
@@ -438,7 +541,7 @@ function App() {
       </section>
 
       <footer id="contact" className="border-t border-white/10 bg-black px-5 py-12 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
+        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
               <Car className="h-7 w-7 text-champagne" />
@@ -453,6 +556,20 @@ function App() {
             <p className="mt-4 text-white/55">hello@rentalscars.in</p>
             <p className="mt-2 text-white/55">+14844818199</p>
             <p className="mt-2 text-white/55">Delhi</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-white">WhatsApp</h3>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-champagne/50 bg-champagne/10 px-4 py-2 text-champagne transition hover:border-champagne hover:bg-champagne/20"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Chat on WhatsApp
+            </a>
+            <p className="mt-3 text-sm text-white/55">+91 8512823394</p>
+            <p className="text-xs text-white/40 mt-2">Available 24/7</p>
           </div>
           <div>
             <h3 className="font-bold text-white">Social Media</h3>
